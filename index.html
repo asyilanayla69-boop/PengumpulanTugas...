@@ -1,0 +1,621 @@
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pengumpulan Tugas</title>
+    <!-- KONFIGURASI TAILWIND BARU -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Mengaktifkan mode gelap berbasis kelas
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+       /* Menyembunyikan panah pada input number */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* -- CSS VARIABLES UNTUK TEMA WARNA -- */
+        :root {
+            --color-primary-50: #eff6ff;
+            --color-primary-100: #dbeafe;
+            --color-primary-300: #93c5fd;
+            --color-primary-400: #60a5fa;
+            --color-primary-500: #3b82f6;
+            --color-primary-600: #2563eb;
+            --color-primary-700: #1d4ed8;
+            --color-primary-800: #1e40af;
+            --color-primary-900: #1e3a8a;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen dark:bg-gray-900 dark:text-gray-200">
+
+    <!-- TOMBOL TEMA BARU -->
+    <div class="fixed bottom-4 right-4 z-50 flex items-center space-x-2">
+        <!-- Pilihan Tema Warna -->
+        <div class="flex p-1 bg-white dark:bg-gray-700 rounded-lg shadow-lg">
+            <button onclick="setAccentTheme('blue')" class="w-5 h-5 bg-blue-500 rounded-full mx-1 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"></button>
+            <button onclick="setAccentTheme('indigo')" class="w-5 h-5 bg-indigo-500 rounded-full mx-1 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500"></button>
+            <button onclick="setAccentTheme('green')" class="w-5 h-5 bg-green-500 rounded-full mx-1 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500"></button>
+            <button onclick="setAccentTheme('pink')" class="w-5 h-5 bg-pink-500 rounded-full mx-1 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-pink-500"></button>
+        </div>
+
+        <!-- Tombol ke Mode Terang (Sun) -->
+        <button onclick="setTheme('light')" id="theme-light-btn" class="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-lg text-yellow-500 hidden dark:inline-block">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 18a6 6 0 100-12 6 6 0 000 12z" />
+            </svg>
+        </button>
+        <!-- Tombol ke Mode Gelap (Moon) -->
+        <button onclick="setTheme('dark')" id="theme-dark-btn" class="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-lg text-[var(--color-primary-800)] dark:text-[var(--color-primary-300)] inline-block dark:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+        </button>
+    </div>
+
+    <div id="app" class="container mx-auto p-4 max-w-4xl">
+
+        <!-- Halaman Login -->
+        <div id="login-page" class="bg-white p-8 rounded-xl shadow-lg transition-all dark:bg-gray-800">
+            <h1 class="text-3xl font-bold text-center text-[var(--color-primary-600)] dark:text-[var(--color-primary-400)] mb-2">Selamat Datang</h1>
+            <p class="text-center text-gray-500 dark:text-gray-400 mb-6">Silakan masuk sebagai Guru atau Siswa.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Masuk sebagai:</label>
+                    <select id="role" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)] transition dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="siswa">Siswa</option>
+                        <option value="guru">Guru</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="kode" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Masukkan Kode:</label>
+                    <input type="password" id="kode" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)] transition dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="••••••••">
+                </div>
+                 <p id="login-error" class="text-red-500 text-sm mt-2 hidden">Kode atau peran salah. Silakan coba lagi.</p>
+                <button onclick="handleLogin()" class="w-full bg-[var(--color-primary-600)] text-white py-3 rounded-lg font-semibold hover:bg-[var(--color-primary-700)] transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary-500)]">Masuk</button>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button onclick="showHelp()" class="text-[var(--color-primary-600)] dark:text-[var(--color-primary-400)] hover:underline">Butuh Bantuan? Lihat Panduan</button>
+            </div>
+        </div>
+
+        <!-- Halaman Guru -->
+        <div id="guru-page" class="hidden">
+            <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-md dark:bg-gray-800">
+                <h1 class="text-2xl font-bold text-[var(--color-primary-700)] dark:text-[var(--color-primary-400)]">Dasbor Guru</h1>
+                <button onclick="handleLogout()" class="bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition">Keluar</button>
+            </div>
+
+            <!-- Atur Batas Waktu -->
+            <div class="bg-white p-6 rounded-xl shadow-lg mb-6 dark:bg-gray-800">
+                <h2 class="text-xl font-semibold mb-4">Atur Batas Waktu Pengumpulan</h2>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <input type="datetime-local" id="deadline" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary-500)] dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:calendar-picker-indicator-white" style="-webkit-calendar-picker-indicator { filter: invert(0.8); }">
+                    <button onclick="setDeadline()" class="bg-green-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-600 transition whitespace-nowrap">Simpan Batas Waktu</button>
+                </div>
+                <p id="deadline-info-guru" class="text-green-600 mt-3 font-medium"></p>
+            </div>
+
+            <!-- Informasi Tugas & Guru -->
+            <div class="bg-white p-6 rounded-xl shadow-lg mb-6 dark:bg-gray-800">
+                <h2 class="text-xl font-semibold mb-4">Informasi Tugas & Guru</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="nama-guru-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Guru:</label>
+                        <input type="text" id="nama-guru-input" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                    <div>
+                        <label for="mapel-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mata Pelajaran:</label>
+                        <input type="text" id="mapel-input" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                    <div>
+                        <label for="keterangan-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Keterangan Tugas:</label>
+                        <textarea id="keterangan-input" rows="3" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary-500)] dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Contoh: Kumpulkan ringkasan Bab 3 dalam format PDF..."></textarea>
+                    </div>
+                    <button onclick="simpanInfoTugas()" class="bg-[var(--color-primary-500)] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[var(--color-primary-600)] transition">Simpan Info Tugas</button>
+                </div>
+            </div>
+
+            <!-- Daftar Tugas Siswa -->
+            <div class="bg-white p-6 rounded-xl shadow-lg dark:bg-gray-800">
+                <h2 class="text-xl font-semibold mb-4">Tugas yang Dikumpulkan</h2>
+                <div id="submission-list" class="space-y-4">
+                    <p class="text-gray-500 dark:text-gray-400">Belum ada tugas yang dikumpulkan.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Siswa -->
+        <div id="siswa-page" class="hidden">
+            <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-md dark:bg-gray-800">
+                <h1 class="text-2xl font-bold text-[var(--color-primary-700)] dark:text-[var(--color-primary-400)]">Halaman Siswa</h1>
+                <button onclick="handleLogout()" class="bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition">Keluar</button>
+            </div>
+            
+            <!-- Informasi Tugas BARU -->
+            <div class="bg-white p-6 rounded-xl shadow-lg mb-6 dark:bg-gray-800">
+                <h2 class="text-xl font-semibold mb-2">Informasi Tugas</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                    <p class="text-gray-700 dark:text-gray-300"><strong class="font-medium">Guru:</strong> <span id="info-guru-display">Belum diatur</span></p>
+                    <p class="text-gray-700 dark:text-gray-300"><strong class="font-medium">Mata Pelajaran:</strong> <span id="info-mapel-display">Belum diatur</span></p>
+                </div>
+                <p id="deadline-info-siswa" class="text-red-600 my-2 font-medium">Batas waktu belum diatur oleh guru.</p>
+                <hr class="my-3 dark:border-gray-600">
+                <p class="text-gray-700 dark:text-gray-300"><strong class="font-medium">Keterangan Tugas:</strong></p>
+                <p id="info-keterangan-display" class="text-gray-600 dark:text-gray-300 mt-1">Belum ada keterangan tugas.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Form Pengumpulan -->
+                <div id="submission-form-container" class="bg-white p-6 rounded-xl shadow-lg dark:bg-gray-800">
+                    <h2 class="text-xl font-semibold mb-2">Formulir Pengumpulan Tugas</h2>
+                    <!-- <p id="deadline-info-siswa" ... Dihapus dari sini dan dipindah ke atas -->
+                    <form id="submission-form" class="space-y-4">
+                        <div>
+                            <label for="nama" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Lengkap:</label>
+                            <input type="text" id="nama" oninput="findAndRenderStudentStatus()" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary-500)] dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label for="kelas" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kelas:</label>
+                            <input type="text" id="kelas" oninput="findAndRenderStudentStatus()" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary-500)] dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label for="absen" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Absen:</label>
+                            <input type="number" id="absen" oninput="findAndRenderStudentStatus()" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary-500)] dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label for="file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pilih File Tugas:</label>
+                            <input type="file" id="file" class="mt-1 w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-primary-50)] dark:file:bg-[var(--color-primary-900)] dark:file:text-[var(--color-primary-300)] file:text-[var(--color-primary-700)] hover:file:bg-[var(--color-primary-100)] dark:hover:file:bg-[var(--color-primary-800)]" required>
+                        </div>
+                        <button type="submit" class="w-full bg-[var(--color-primary-600)] text-white py-3 rounded-lg font-semibold hover:bg-[var(--color-primary-700)] transition-transform transform hover:scale-105">Kumpulkan Tugas</button>
+                    </form>
+                </div>
+                
+                <!-- Status Pengumpulan -->
+                <div class="bg-white p-6 rounded-xl shadow-lg dark:bg-gray-800">
+                    <h2 class="text-xl font-semibold mb-4">Status Pengumpulan</h2>
+                    <div id="submission-status" class="space-y-3 text-gray-600 dark:text-gray-300">
+                         <p class="text-gray-500 dark:text-gray-400">Masukkan nama, kelas, dan nomor absen di form kiri untuk melihat status, atau kumpulkan tugas jika Anda belum.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Panduan -->
+        <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-40">
+            <div class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full transform transition-all scale-95 relative dark:bg-gray-800">
+                <!-- Tombol X ditambahkan -->
+                <button onclick="hideHelp()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h2 class="text-2xl font-bold mb-4 text-[var(--color-primary-600)] dark:text-[var(--color-primary-400)]">Panduan Penggunaan</h2>
+                <div class="space-y-4 text-gray-700 dark:text-gray-300">
+                    <div>
+                        <h3 class="font-semibold text-lg">Untuk Guru:</h3>
+                        <ol class="list-decimal list-inside pl-2 mt-1">
+                            <li>Pilih peran sebagai "Guru" dan masukkan kode yang diberikan.</li>
+                            <li>Atur batas waktu pengumpulan tugas untuk siswa.</li>
+                            <li>Lihat daftar tugas yang telah dikumpulkan oleh siswa.</li>
+                            <li>Berikan nilai dan komentar pada setiap tugas.</li>
+                            <li>Klik "Simpan" untuk menyimpan penilaian Anda.</li>
+                        </ol>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">Untuk Siswa:</h3>
+                        <ol class="list-decimal list-inside pl-2 mt-1">
+                            <li>Pilih peran sebagai "Siswa" dan masukkan kode yang diberikan.</li>
+                            <li>Perhatikan batas waktu pengumpulan yang tertera.</li>
+                            <li>Isi nama lengkap, kelas, dan nomor absen Anda.</li>
+                            <li>Saat data Anda diisi, status pengumpulan akan muncul di sisi kanan.</li>
+                            <li>Pilih dan unggah file tugas Anda, lalu klik "Kumpulkan Tugas".</li>
+                            <li>Setelah mengumpulkan, formulir akan kosong dan siap digunakan siswa lain.</li>
+                        </ol>
+                    </div>
+                </div>
+                <button onclick="hideHelp()" class="mt-6 w-full bg-[var(--color-primary-600)] text-white py-2 rounded-lg font-semibold hover:bg-[var(--color-primary-700)] transition">Tutup</button>
+            </div>
+        </div>
+
+        <!-- Modal Alert Universal BARU -->
+        <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full transform transition-all scale-95 dark:bg-gray-800">
+                <h3 id="alert-title" class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Pemberitahuan</h3>
+                <p id="alert-message" class="text-gray-600 dark:text-gray-300 mb-6"></p>
+                <button onclick="hideAlert()" class="w-full bg-[var(--color-primary-600)] text-white py-2 rounded-lg font-semibold hover:bg-[var(--color-primary-700)] transition">Tutup</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Database sementara (data akan hilang saat halaman di-refresh)
+        let submissions = [];
+        let deadline = null;
+        let namaGuru = "";
+        let mataPelajaran = "";
+        let keteranganTugas = "Belum ada keterangan tugas.";
+
+        const GURU_CODE = '321';
+        const SISWA_CODE = '123';
+
+        // Fungsi untuk menavigasi halaman
+        function showPage(pageId) {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('guru-page').classList.add('hidden');
+            document.getElementById('siswa-page').classList.add('hidden');
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        // Fungsi Login
+        function handleLogin() {
+            const role = document.getElementById('role').value;
+            const kode = document.getElementById('kode').value;
+            const errorElement = document.getElementById('login-error');
+
+            if (role === 'guru' && kode === GURU_CODE) {
+                showPage('guru-page');
+                renderSubmissions();
+                updateDeadlineInfo();
+                loadInfoTugasGuru(); // <-- Ditambahkan
+                errorElement.classList.add('hidden');
+            } else if (role === 'siswa' && kode === SISWA_CODE) {
+                showPage('siswa-page');
+                updateDeadlineInfo();
+                updateInfoTugasSiswa(); // <-- Ditambahkan
+                document.getElementById('submission-form').reset();
+                findAndRenderStudentStatus();
+                errorElement.classList.add('hidden');
+            } else {
+                errorElement.classList.remove('hidden');
+            }
+             document.getElementById('kode').value = '';
+        }
+        
+        // Fungsi Logout
+        function handleLogout() {
+            showPage('login-page');
+            document.getElementById('submission-form').reset();
+        }
+
+        // --- FUNGSI BARU ---
+        function simpanInfoTugas() {
+            namaGuru = document.getElementById('nama-guru-input').value;
+            mataPelajaran = document.getElementById('mapel-input').value;
+            keteranganTugas = document.getElementById('keterangan-input').value;
+            
+            // Update display di halaman siswa (untuk login berikutnya)
+            updateInfoTugasSiswa(); 
+            
+            showAlert('Informasi tugas berhasil disimpan!');
+        }
+
+        function loadInfoTugasGuru() {
+            // Memuat data yang tersimpan ke input field guru
+            document.getElementById('nama-guru-input').value = namaGuru;
+            document.getElementById('mapel-input').value = mataPelajaran;
+            document.getElementById('keterangan-input').value = keteranganTugas;
+        }
+        
+        function updateInfoTugasSiswa() {
+            // Menampilkan data di kotak info siswa
+            document.getElementById('info-guru-display').textContent = namaGuru || 'Belum diatur';
+            document.getElementById('info-mapel-display').textContent = mataPelajaran || 'Belum diatur';
+            document.getElementById('info-keterangan-display').textContent = keteranganTugas || 'Belum ada keterangan tugas.';
+        }
+        // --- AKHIR FUNGSI BARU ---
+
+        // Fungsi untuk Guru: mengatur deadline
+        function setDeadline() {
+            const deadlineInput = document.getElementById('deadline').value;
+            if (deadlineInput) {
+                deadline = new Date(deadlineInput);
+                updateDeadlineInfo();
+                 showAlert('Batas waktu berhasil disimpan!');
+            } else {
+                showAlert('Silakan pilih tanggal dan waktu terlebih dahulu.', true);
+            }
+        }
+
+        // Fungsi untuk memperbarui info deadline di semua halaman
+        function updateDeadlineInfo() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            const deadlineText = deadline ? `Batas Waktu: ${deadline.toLocaleDateString('id-ID', options)}` : 'Batas waktu belum diatur oleh guru.';
+            
+            const guruInfo = document.getElementById('deadline-info-guru');
+            const siswaInfo = document.getElementById('deadline-info-siswa');
+
+            guruInfo.textContent = deadline ? `Batas Waktu Saat Ini: ${deadline.toLocaleDateString('id-ID', options)}` : '';
+            siswaInfo.textContent = deadlineText;
+
+            if(deadline) {
+                siswaInfo.classList.remove('text-red-600');
+                siswaInfo.classList.add('text-green-600');
+            } else {
+                siswaInfo.classList.add('text-red-600');
+                siswaInfo.classList.remove('text-green-600');
+            }
+        }
+        
+        // Fungsi untuk Siswa: menangani pengumpulan tugas
+        document.getElementById('submission-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nama = document.getElementById('nama').value;
+            const kelas = document.getElementById('kelas').value;
+            const absen = document.getElementById('absen').value;
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showAlert('Anda harus memilih file untuk dikumpulkan!', true);
+                return;
+            }
+            
+            // Cek apakah siswa sudah pernah mengumpulkan
+            const existingSubmissionIndex = submissions.findIndex(s => s.nama === nama && s.kelas === kelas && s.absen === absen);
+
+            const submission = {
+                id: existingSubmissionIndex > -1 ? submissions[existingSubmissionIndex].id : Date.now(),
+                nama,
+                kelas,
+                absen,
+                file,
+                timestamp: new Date(),
+                nilai: null,
+                komentar: ''
+            };
+            
+            if (existingSubmissionIndex > -1) {
+                // Update pengumpulan yang sudah ada
+                submissions[existingSubmissionIndex] = submission;
+            } else {
+                // Tambah pengumpulan baru
+                submissions.push(submission);
+            }
+
+            renderStudentStatus(submission);
+            renderSubmissions(); // Update tampilan guru secara real-time
+            
+            showAlert('Tugas berhasil dikumpulkan!');
+            document.getElementById('submission-form').reset();
+            findAndRenderStudentStatus(); // Bersihkan status setelah submit
+        });
+        
+        // Fungsi untuk mencari dan menampilkan status pengumpulan siswa
+        function findAndRenderStudentStatus() {
+            const nama = document.getElementById('nama').value.trim();
+            const kelas = document.getElementById('kelas').value.trim();
+            const absen = document.getElementById('absen').value.trim();
+
+            if (!nama && !kelas && !absen) {
+                 renderStudentStatus(null);
+                 return;
+            }
+
+            const submission = submissions.find(s => s.nama === nama && s.kelas === kelas && s.absen === absen);
+            renderStudentStatus(submission);
+        }
+
+        // Fungsi untuk menampilkan status pengumpulan siswa
+        function renderStudentStatus(submission) {
+            const statusContainer = document.getElementById('submission-status');
+            
+            if (!submission) {
+                statusContainer.innerHTML = '<p class="text-gray-500">Masukkan nama, kelas, dan nomor absen di form kiri untuk melihat status, atau kumpulkan tugas jika Anda belum.</p>';
+                return;
+            }
+            
+            const submissionTime = submission.timestamp;
+            let statusText = 'Tepat Waktu';
+            let statusColor = 'text-green-600';
+
+            if (deadline && submissionTime > deadline) {
+                statusText = 'Terlambat';
+                statusColor = 'text-red-600';
+            }
+            
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+
+            statusContainer.innerHTML = `
+                <p><strong>Nama:</strong> ${submission.nama}</p>
+                <p><strong>Kelas:</strong> ${submission.kelas}</p>
+                <p><strong>No. Absen:</strong> ${submission.absen}</p>
+                <p><strong>Nama File:</strong> ${submission.file.name}</p>
+                <p><strong>Waktu Kumpul:</strong> ${submission.timestamp.toLocaleDateString('id-ID', options)}</p>
+                <p><strong>Status:</strong> <span class="font-bold ${statusColor}">${statusText}</span></p>
+                <hr class="my-3 dark:border-gray-600">
+                <h3 class="font-semibold text-lg">Penilaian Guru:</h3>
+                <p><strong>Nilai:</strong> <span id="nilai-${submission.id}">${submission.nilai ?? 'Belum dinilai'}</span></p>
+                <p><strong>Komentar:</strong> <span id="komentar-${submission.id}" class="italic">${submission.komentar || 'Belum ada komentar'}</span></p>
+            `;
+        }
+
+        // Fungsi untuk Guru: menampilkan daftar tugas yang masuk
+        function renderSubmissions() {
+            const listContainer = document.getElementById('submission-list');
+            if (submissions.length === 0) {
+                listContainer.innerHTML = '<p class="text-gray-500">Belum ada tugas yang dikumpulkan.</p>';
+                return;
+            }
+
+            listContainer.innerHTML = submissions.sort((a, b) => b.timestamp - a.timestamp).map(sub => {
+                const submissionTime = sub.timestamp;
+                let statusText = 'Tepat Waktu';
+                let statusColor = 'bg-green-100 text-green-800';
+
+                if (deadline && submissionTime > deadline) {
+                    statusText = 'Terlambat';
+                    statusColor = 'bg-red-100 text-red-800';
+                }
+                
+                const fileURL = URL.createObjectURL(sub.file);
+                const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                
+                return `
+                    <div class="border border-gray-200 p-4 rounded-lg dark:border-gray-700">
+                        <div class="grid md:grid-cols-3 gap-4 items-start">
+                            <div>
+                                <p class="font-bold text-lg">${sub.nama}</p>
+                                <p class="text-sm text-gray-600">Kelas: ${sub.kelas} | Absen: ${sub.absen}</p>
+                                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${statusColor}">${statusText}</span>
+                            </div>
+                            <div>
+                                <p class="text-sm"><strong>Dikumpulkan pada:</strong></p>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">${submissionTime.toLocaleDateString('id-ID', options)}</p>
+                                <a href="${fileURL}" download="${sub.file.name}" class="text-[var(--color-primary-600)] dark:text-[var(--color-primary-400)] hover:underline text-sm font-medium">Unduh File Tugas</a>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="number" id="nilai-input-${sub.id}" class="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Beri Nilai (0-100)" value="${sub.nilai ?? ''}">
+                                <textarea id="komentar-input-${sub.id}" class="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="2" placeholder="Beri komentar...">${sub.komentar}</textarea>
+                                <button onclick="saveGrade(${sub.id})" class="w-full bg-[var(--color-primary-500)] text-white py-2 rounded-md font-semibold hover:bg-[var(--color-primary-600)] transition">Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Fungsi untuk Guru: menyimpan nilai dan komentar
+        function saveGrade(submissionId) {
+            const nilai = document.getElementById(`nilai-input-${submissionId}`).value;
+            const komentar = document.getElementById(`komentar-input-${submissionId}`).value;
+            
+            const submission = submissions.find(s => s.id === submissionId);
+            if (submission) {
+                submission.nilai = nilai;
+                submission.komentar = komentar;
+                
+                // Update tampilan di halaman siswa jika siswa tersebut sedang login dan datanya cocok
+                findAndRenderStudentStatus();
+
+                showAlert('Nilai dan komentar berhasil disimpan!');
+            }
+        }
+
+        // Fungsi untuk menampilkan modal panduan
+        function showHelp() {
+            const modal = document.getElementById('help-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.querySelector('div').classList.remove('scale-95'), 10);
+        }
+
+        // Fungsi untuk menyembunyikan modal panduan
+        function hideHelp() {
+            const modal = document.getElementById('help-modal');
+            modal.querySelector('div').classList.add('scale-95')
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        // --- FUNGSI ALERT KUSTOM BARU ---
+        // Fungsi untuk menampilkan modal alert kustom
+        function showAlert(message, isError = false) {
+            const modal = document.getElementById('alert-modal');
+            const title = document.getElementById('alert-title');
+            const messageEl = document.getElementById('alert-message');
+            const button = modal.querySelector('button');
+
+            messageEl.textContent = message;
+
+            if (isError) {
+                title.textContent = 'Error';
+                title.classList.remove('text-gray-800', 'dark:text-gray-100');
+                title.classList.add('text-red-600', 'dark:text-red-400');
+                button.classList.remove('bg-[var(--color-primary-600)]', 'hover:bg-[var(--color-primary-700)]');
+                button.classList.add('bg-red-600', 'hover:bg-red-700');
+            } else {
+                title.textContent = 'Pemberitahuan';
+                title.classList.remove('text-red-600', 'dark:text-red-400');
+                title.classList.add('text-gray-800', 'dark:text-gray-100');
+                button.classList.remove('bg-red-600', 'hover:bg-red-700');
+                button.classList.add('bg-[var(--color-primary-600)]', 'hover:bg-[var(--color-primary-700)]');
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.querySelector('div').classList.remove('scale-95'), 10);
+        }
+
+        // Fungsi untuk menyembunyikan modal alert kustom
+        function hideAlert() {
+            const modal = document.getElementById('alert-modal');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+        // --- AKHIR FUNGSI ALERT KUSTOM ---
+
+        // --- FUNGSI TEMA BARU ---
+        const themes = {
+            'blue': {
+                '50': '#eff6ff', '100': '#dbeafe', '300': '#93c5fd', '400': '#60a5fa', '500': '#3b82f6', '600': '#2563eb', '700': '#1d4ed8', '800': '#1e40af', '900': '#1e3a8a'
+            },
+            'indigo': {
+                '50': '#eef2ff', '100': '#e0e7ff', '300': '#a5b4fc', '400': '#818cf8', '500': '#6366f1', '600': '#4f46e5', '700': '#4338ca', '800': '#3730a3', '900': '#312e81'
+            },
+            'green': {
+                '50': '#f0fdf4', '100': '#dcfce7', '300': '#86efac', '400': '#4ade80', '500': '#22c55e', '600': '#16a34a', '700': '#15803d', '800': '#166534', '900': '#14532d'
+            },
+            'pink': {
+                '50': '#fdf2f8', '100': '#fce7f3', '300': '#f9a8d4', '400': '#f472b6', '500': '#ec4899', '600': '#db2777', '700': '#be185d', '800': '#9d174d', '900': '#831843'
+            }
+        };
+
+        function setAccentTheme(themeName) {
+            const theme = themes[themeName];
+            if (!theme) return;
+
+            for (const [shade, color] of Object.entries(theme)) {
+                document.documentElement.style.setProperty(`--color-primary-${shade}`, color);
+            }
+            localStorage.setItem('accentTheme', themeName);
+        }
+
+        function loadAccentTheme() {
+            const savedTheme = localStorage.getItem('accentTheme');
+            if (savedTheme && themes[savedTheme]) {
+                setAccentTheme(savedTheme);
+            } else {
+                setAccentTheme('blue'); // Default ke biru
+            }
+        }
+
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark'); // Terapkan ke <html>
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                setTheme('dark');
+            } else {
+                setTheme('light'); // Default ke terang
+            }
+        }
+        
+        // Muat tema segera setelah semua fungsi didefinisikan
+        loadTheme();
+        loadAccentTheme();
+        // --- AKHIR FUNGSI TEMA ---
+    </script>
+</body>
+</html>
+
